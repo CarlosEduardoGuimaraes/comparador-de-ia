@@ -1,3 +1,6 @@
+Aqui está o HTML limpo, seguindo a mesma lógica do JavaScript: removi os comentários excessivos e mantive apenas os que descrevem os grandes blocos estruturais e de estilo.
+
+```html
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -7,14 +10,14 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <style>
-        /* --- TEMA GALÁXIA --- */
+        /* 1. Definição de Variáveis (Tema Galáxia) e Estilos Globais do Body */
         :root {
             --bg-deep: #050508;
             --glass-bg: rgba(20, 20, 35, 0.6);
             --glass-border: rgba(255, 255, 255, 0.1);
             --accent-purple: #b026ff;
             --accent-cyan: #00d2ff;
-            --accent-pol: #00ff9d; /* Verde Neon para Pollinations */
+            --accent-pol: #00ff9d;
             --text-main: #e0e0e0;
         }
 
@@ -24,14 +27,13 @@
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-deep);
             color: var(--text-main);
-            /* Efeito de Nebulosa no fundo */
             background-image: 
                 radial-gradient(circle at 15% 50%, rgba(0, 255, 157, 0.1), transparent 40%),
                 radial-gradient(circle at 85% 30%, rgba(14, 165, 233, 0.15), transparent 40%);
             min-height: 100vh;
         }
 
-        /* Layout Principal */
+        /* 2. Layout Estrutural: Header, Títulos e Container Principal */
         header {
             display: flex;
             justify-content: space-between;
@@ -45,7 +47,6 @@
         h1 {
             margin: 0;
             font-size: 1.5rem;
-            /* Gradiente misturando cores das IAs */
             background: linear-gradient(90deg, #fff, var(--accent-pol), var(--accent-purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -58,7 +59,7 @@
             padding: 20px;
         }
 
-        /* Área de Input */
+        /* 3. Área de Entrada (Textarea e Botões) */
         .input-area {
             display: flex;
             flex-direction: column;
@@ -86,9 +87,7 @@
             transition: border-color 0.3s;
         }
 
-        textarea:focus {
-            border-color: var(--accent-purple);
-        }
+        textarea:focus { border-color: var(--accent-purple); }
 
         #send-btn {
             align-self: flex-end;
@@ -118,12 +117,9 @@
             cursor: pointer;
         }
         
-        #config-btn:hover {
-            color: white;
-            border-color: #fff;
-        }
+        #config-btn:hover { color: white; border-color: #fff; }
 
-        /* Grid de Resultados */
+        /* 4. Grid de Resultados e Cards das IAs */
         .results-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -141,9 +137,7 @@
             transition: transform 0.3s;
         }
         
-        .result-card:hover {
-            border-color: rgba(255,255,255,0.2);
-        }
+        .result-card:hover { border-color: rgba(255,255,255,0.2); }
 
         .card-header {
             padding: 12px 15px;
@@ -155,14 +149,7 @@
             border-bottom: 1px solid var(--glass-border);
         }
 
-        /* Cores específicas para cada modelo */
-        
-        /* POLLINATIONS (Verde/Mint) */
-        .pol-header { 
-            background: linear-gradient(90deg, rgba(0, 255, 157, 0.15), transparent); 
-            color: var(--accent-pol); 
-        }
-        
+        .pol-header { background: linear-gradient(90deg, rgba(0, 255, 157, 0.15), transparent); color: var(--accent-pol); }
         .meta-header { background: linear-gradient(90deg, rgba(6, 104, 225, 0.2), transparent); color: #6db1ff; }
         .instant-header { background: linear-gradient(90deg, rgba(255, 100, 100, 0.15), transparent); color: #ffadad; }
 
@@ -183,12 +170,12 @@
             min-height: 100px;
         }
 
-        /* Ajustes do Markdown */
         .output-content code {
             background: rgba(255,255,255,0.1);
             padding: 2px 4px;
             border-radius: 3px;
         }
+        
         .output-content pre {
             background: #000;
             padding: 10px;
@@ -197,7 +184,7 @@
             border: 1px solid var(--glass-border);
         }
 
-        /* Modal Config */
+        /* 5. Modal de Configuração e Responsividade */
         .hidden { display: none !important; }
         
         .modal {
@@ -225,6 +212,7 @@
         
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; margin-bottom: 5px; color: #ccc; font-size: 0.9rem; }
+        
         .input-group input {
             width: 100%;
             padding: 10px;
@@ -234,9 +222,7 @@
             color: white;
             box-sizing: border-box;
         }
-        .input-group input::placeholder { color: #555; }
         
-        /* Estilo para input desabilitado */
         .input-group input:disabled {
             background: #1a1a1a;
             color: #666;
@@ -325,3 +311,4 @@
     <script src="script.js?v=4"></script>
 </body>
 </html>
+```
