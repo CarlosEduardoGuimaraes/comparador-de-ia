@@ -3,8 +3,8 @@
     --card-bg: #1e1e2e;
     --text-primary: #cdd6f4;
     --gemini-color: #89b4fa;
-    --meta-color: #fab387; /* Laranja suave para o Smart */
-    --instant-color: #a6e3a1; /* Verde para o Rápido */
+    --meta-color: #fab387; 
+    --instant-color: #a6e3a1; 
 }
 
 body {
@@ -50,3 +50,4 @@ main { flex: 1; display: flex; flex-direction: column; padding: 1rem; gap: 1rem;
     .results-grid { grid-template-columns: 1fr; overflow-y: auto; }
     .input-area { height: 150px; flex-direction: column; }
 }
+
