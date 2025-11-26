@@ -1,7 +1,7 @@
 // --- CONFIGURAÇÃO DOS MODELOS ---
 const MODELS = {
-    // Modelo 1.5 Flash (Rápido e barato/gratuito)
-    gemini: 'gemini-1.5-flash-latest', 
+    // Substituindo Gemini por Hugging Face (Mistral 7B é ótimo e free)
+    hf: 'mistralai/Mistral-7B-Instruct-v0.3', 
 
     // Groq: Llama 3.3 (Smart)
     groqSmart: 'llama-3.3-70b-versatile',
@@ -11,20 +11,23 @@ const MODELS = {
 };
 
 // ---------------------------------------------------------
-// 🔒 COLE SUA NOVA CHAVE DO AI STUDIO ABAIXO (DENTRO DAS ASPAS)
+// 🔒 COLE SEU TOKEN DO HUGGING FACE AQUI
+// (Começa com "hf_...")
 // ---------------------------------------------------------
-const MY_GEMINI_KEY = ''; 
+const MY_HF_TOKEN = ''; 
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- CORREÇÃO DE CACHE (Forçar a nova chave) ---
-    // Se você colocou uma chave no código acima, nós forçamos
-    // o navegador a esquecer a antiga e usar essa nova agora.
-    if (MY_GEMINI_KEY && MY_GEMINI_KEY.trim() !== '') {
-        console.log("Forçando atualização da chave Gemini pelo código...");
-        localStorage.setItem('gemini_key', MY_GEMINI_KEY);
+    // --- ATUALIZAÇÃO DE CHAVE ---
+    // Se você preencheu o MY_HF_TOKEN acima, ele salva automaticamente
+    // como 'hf_key' no navegador e ignora a antiga gemini_key.
+    if (MY_HF_TOKEN && MY_HF_TOKEN.trim() !== '') {
+        const currentSaved = localStorage.getItem('hf_key');
+        if (currentSaved !== MY_HF_TOKEN) {
+            console.log("Atualizando token Hugging Face...");
+            localStorage.setItem('hf_key', MY_HF_TOKEN);
+        }
     }
-    // ------------------------------------------------
 
     const promptInput = document.getElementById('prompt-input');
     const sendBtn = document.getElementById('send-btn');
@@ -32,21 +35,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('config-modal');
     const saveKeysBtn = document.getElementById('save-keys');
 
-    // Carrega chaves salvas ou usa a fixa do código
+    // Carrega chaves
     loadKeys();
 
     // -- Modal Config --
     configBtn.onclick = () => modal.classList.remove('hidden');
 
     saveKeysBtn.onclick = () => {
-        const geminiVal = document.getElementById('gemini-key').value.trim();
+        // OBS: Estamos usando o input que tem ID 'gemini-key' no HTML 
+        // para guardar a chave da Hugging Face, para você não precisar mudar o HTML.
+        const hfVal = document.getElementById('gemini-key').value.trim();
         const groqVal = document.getElementById('groq-key').value.trim();
 
-        if (geminiVal) localStorage.setItem('gemini_key', geminiVal);
+        if (hfVal) localStorage.setItem('hf_key', hfVal);
         if (groqVal) localStorage.setItem('groq_key', groqVal);
 
         modal.classList.add('hidden');
-        alert('Chaves salvas! Tente disparar novamente.');
+        alert('Chaves salvas! A chave "Gemini" agora é sua chave Hugging Face.');
     };
 
     // -- Botão Enviar --
@@ -54,35 +59,35 @@ document.addEventListener('DOMContentLoaded', () => {
         const prompt = promptInput.value;
         if (!prompt) return alert('Digite um prompt!');
 
-        // Recupera a chave atualizada do storage
-        let geminiKey = localStorage.getItem('gemini_key');
+        // 1. Tenta pegar a chave HF do storage
+        let hfKey = localStorage.getItem('hf_key');
         
-        // Fallback de segurança: Se o storage falhar, pega a do código
-        if (!geminiKey || geminiKey === 'undefined') {
-            geminiKey = MY_GEMINI_KEY;
+        // 2. Fallback para a constante
+        if (!hfKey) {
+            hfKey = MY_HF_TOKEN;
         }
 
-        // Validação final da chave
-        if (!geminiKey) {
-            alert('Você precisa configurar uma chave API do Gemini (no código ou no botão de engrenagem).');
+        if (!hfKey) {
+            alert('Você precisa configurar o Token da Hugging Face (no lugar da chave Gemini).');
             modal.classList.remove('hidden');
             return;
         }
 
         const groqKey = localStorage.getItem('groq_key');
 
-        // Resetar UI e Timers
-        setLoading('gemini', 'Gemini 1.5 Flash');
+        // Resetar UI (Usando o output do Gemini para mostrar o HF)
+        setLoading('gemini', 'Hugging Face (Mistral)');
+        
         if(groqKey) {
             setLoading('groq1', 'Llama 3.3 (Smart)');
             setLoading('groq2', 'Llama 3.1 (Fast)');
         } else {
-             document.getElementById(`output-groq1`).innerHTML = '<small style="opacity:0.5">Sem chave Groq configurada</small>';
-             document.getElementById(`output-groq2`).innerHTML = '<small style="opacity:0.5">Sem chave Groq configurada</small>';
+             document.getElementById(`output-groq1`).innerHTML = '<small style="opacity:0.5">Sem chave Groq</small>';
+             document.getElementById(`output-groq2`).innerHTML = '<small style="opacity:0.5">Sem chave Groq</small>';
         }
 
         // Disparar requisições
-        fetchGemini(prompt, geminiKey);
+        fetchHuggingFace(prompt, hfKey);
         
         if (groqKey) {
             fetchGroq(prompt, groqKey, MODELS.groqSmart, 'groq1');
@@ -93,9 +98,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function loadKeys() {
-        // Atualiza os inputs visuais
-        const savedGemini = localStorage.getItem('gemini_key');
-        document.getElementById('gemini-key').value = savedGemini || MY_GEMINI_KEY;
+        // Carrega a chave HF dentro do input que se chama 'gemini-key'
+        const savedHf = localStorage.getItem('hf_key');
+        document.getElementById('gemini-key').value = savedHf || MY_HF_TOKEN;
+        
+        // Se quiser mudar o placeholder para facilitar o entendimento:
+        document.getElementById('gemini-key').placeholder = "Cole seu Token Hugging Face aqui";
+        
         document.getElementById('groq-key').value = localStorage.getItem('groq_key') || '';
     }
 
@@ -144,36 +153,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- GOOGLE GEMINI (API V1BETA) ---
-    async function fetchGemini(prompt, apiKey) {
+    // --- HUGGING FACE INFERENCE API ---
+    async function fetchHuggingFace(prompt, apiKey) {
         const start = performance.now();
         try {
-            // URL da API
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODELS.gemini}:generateContent?key=${apiKey}`;
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { "Content-Type": "application/json" },
+            const response = await fetch(`https://api-inference.huggingface.co/models/${MODELS.hf}`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${apiKey}`,
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify({
-                    contents: [{
-                        parts: [{ text: prompt }]
-                    }]
+                    inputs: prompt,
+                    parameters: {
+                        max_new_tokens: 512, // Limite de resposta
+                        return_full_text: false, // Não repete a pergunta na resposta
+                        temperature: 0.7
+                    }
                 })
             });
 
             const data = await response.json();
 
-            // Tratamento de erros
+            // Tratamento de erro específico do HF
             if (data.error) {
-                let msg = data.error.message || "Erro desconhecido.";
-                if (msg.includes("API key not valid")) msg = "Sua chave API está inválida ou expirada.";
-                if (msg.includes("not found")) msg = "Modelo não encontrado ou Chave sem Permissão. (Verifique se criou a chave no Google AI Studio)";
-                throw new Error(msg);
+                // Erro comum: Modelo carregando (Cold Boot)
+                if (data.error.includes("loading")) {
+                    throw new Error("O modelo está 'acordando'. Aguarde 20s e tente de novo.");
+                }
+                throw new Error(data.error);
             }
 
-            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "O Gemini não retornou texto.";
+            // A resposta do HF geralmente é um array: [{ generated_text: "..." }]
+            let text = "Sem resposta.";
+            if (Array.isArray(data) && data.length > 0) {
+                text = data[0].generated_text;
+            } else if (data.generated_text) {
+                text = data.generated_text;
+            }
 
-            updateResult('gemini', text, start);
+            updateResult('gemini', text, start); // Usando o slot visual do Gemini
 
         } catch (error) {
             showError('gemini', error.message);
@@ -199,9 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
-            if (data.error) {
-                throw new Error(data.error.message);
-            }
+            if (data.error) throw new Error(data.error.message);
 
             const text = data.choices?.[0]?.message?.content || "Sem resposta.";
             updateResult(elementId, text, start);
