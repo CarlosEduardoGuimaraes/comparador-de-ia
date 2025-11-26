@@ -1,12 +1,12 @@
-// --- CONFIGURAÇÃO DOS MODELOS (Versão "Blindada" - Nov/2025) ---
+// --- CONFIGURAÇÃO DOS MODELOS (Versão Compatibilidade) ---
 const MODELS = {
-    // Google: Nome padrão, sem 'latest', rodando na v1beta
-    gemini: 'gemini-1.5-flash', 
+    // Google: Usando 'gemini-pro' (versão 1.0) que é compatível com todas as chaves
+    gemini: 'gemini-pro', 
     
-    // Groq: Llama 3.3 (Versatile) - O mais novo da Meta
+    // Groq: Llama 3.3 (Smart)
     groqSmart: 'llama-3.3-70b-versatile', 
     
-    // Groq: Llama 3.1 (Instant) - O mais rápido
+    // Groq: Llama 3.1 (Fast)
     groqFast: 'llama-3.1-8b-instant'
 };
 
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Resetar UI
-        setLoading('gemini', 'Gemini 1.5 Flash');
+        setLoading('gemini', 'Gemini Pro');
         setLoading('groq1', 'Llama 3.3 (Smart)');
         setLoading('groq2', 'Llama 3.1 (Fast)');
 
@@ -88,11 +88,11 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>`;
     }
 
-    // --- GOOGLE GEMINI (Volta para v1beta que é mais permissivo) ---
+    // --- GOOGLE GEMINI (Versão PRO - Mais compatível) ---
     async function fetchGemini(prompt, apiKey) {
         const start = performance.now();
         try {
-            // URL v1beta padrão
+            // URL usando a versão v1beta e o modelo gemini-pro
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODELS.gemini}:generateContent?key=${apiKey}`;
             
             const response = await fetch(url, {
@@ -104,18 +104,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             
             if (data.error) {
-                let msg = data.error.message;
-                // Tratamento específico se a chave não tiver acesso ao Flash
-                if (msg.includes('not found') || msg.includes('404')) {
-                    throw new Error(`Modelo Flash não encontrado. Verifique sua API Key no Google AI Studio.`);
-                }
-                throw new Error(msg);
+                // Se der erro aqui, a chave é realmente inválida
+                throw new Error(data.error.message);
             }
 
             const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sem resposta.";
             updateResult('gemini', text, start);
         } catch (error) {
-            showError('gemini', error.message);
+            showError('gemini', "Verifique sua chave ou gere uma nova em aistudio.google.com. Detalhe: " + error.message);
         }
     }
 
@@ -140,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.error) {
                 if (data.error.code === 'model_not_found') {
-                    throw new Error(`Modelo ${model} parece ter sido desativado. Verifique o console da Groq.`);
+                    throw new Error(`Modelo descontinuado.`);
                 }
                 throw new Error(data.error.message);
             }
