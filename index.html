@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena de IA - Hugging Face & Groq</title>
+    <title>Arena de IA - Pollinations & Groq</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <style>
@@ -14,7 +14,7 @@
             --glass-border: rgba(255, 255, 255, 0.1);
             --accent-purple: #b026ff;
             --accent-cyan: #00d2ff;
-            --accent-hf: #ffd21e; /* Amarelo Hugging Face */
+            --accent-pol: #00ff9d; /* Verde Neon para Pollinations */
             --text-main: #e0e0e0;
         }
 
@@ -26,7 +26,7 @@
             color: var(--text-main);
             /* Efeito de Nebulosa no fundo */
             background-image: 
-                radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.25), transparent 40%),
+                radial-gradient(circle at 15% 50%, rgba(0, 255, 157, 0.1), transparent 40%),
                 radial-gradient(circle at 85% 30%, rgba(14, 165, 233, 0.15), transparent 40%);
             min-height: 100vh;
         }
@@ -45,11 +45,11 @@
         h1 {
             margin: 0;
             font-size: 1.5rem;
-            /* Gradiente misturando cores Groq e HF */
-            background: linear-gradient(90deg, #fff, var(--accent-hf), var(--accent-cyan));
+            /* Gradiente misturando cores das IAs */
+            background: linear-gradient(90deg, #fff, var(--accent-pol), var(--accent-purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+            text-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
         }
 
         main {
@@ -156,10 +156,11 @@
         }
 
         /* Cores específicas para cada modelo */
-        /* HUGGING FACE (Amarelo) - Substitui o antigo Gemini */
-        .hf-header { 
-            background: linear-gradient(90deg, rgba(255, 210, 30, 0.15), transparent); 
-            color: var(--accent-hf); 
+        
+        /* POLLINATIONS (Verde/Mint) */
+        .pol-header { 
+            background: linear-gradient(90deg, rgba(0, 255, 157, 0.15), transparent); 
+            color: var(--accent-pol); 
         }
         
         .meta-header { background: linear-gradient(90deg, rgba(6, 104, 225, 0.2), transparent); color: #6db1ff; }
@@ -234,6 +235,14 @@
             box-sizing: border-box;
         }
         .input-group input::placeholder { color: #555; }
+        
+        /* Estilo para input desabilitado */
+        .input-group input:disabled {
+            background: #1a1a1a;
+            color: #666;
+            border-color: #222;
+            cursor: not-allowed;
+        }
 
         #save-keys {
             width: 100%;
@@ -267,8 +276,8 @@
             <p class="info">Seus dados ficam salvos apenas no navegador.</p>
             
             <div class="input-group">
-                <label>Hugging Face Access Token (hf_...):</label>
-                <input type="password" id="gemini-key" placeholder="Cole seu token Hugging Face aqui...">
+                <label>Pollinations AI (Gratuito - Sem chave):</label>
+                <input type="text" id="gemini-key" placeholder="Não requer chave de API!" disabled>
             </div>
 
             <div class="input-group">
@@ -288,8 +297,8 @@
 
         <div class="results-grid">
             <div class="result-card">
-                <div class="card-header hf-header">
-                    <span>🤗 Hugging Face (Mistral)</span>
+                <div class="card-header pol-header">
+                    <span>🔮 Pollinations.ai (GPT-4o)</span>
                     <span id="timer-gemini" class="timer">--</span>
                 </div>
                 <div id="output-gemini" class="output-content"></div>
@@ -313,6 +322,6 @@
         </div>
     </main>
 
-    <script src="script.js?v=3"></script>
+    <script src="script.js?v=4"></script>
 </body>
 </html>
