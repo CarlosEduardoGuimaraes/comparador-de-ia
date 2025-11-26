@@ -3,15 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Free AI Arena</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Arena de IA</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <style>
+        /* --- TEMA GALÁXIA --- */
+        :root {
+            --bg-deep: #050508;
+            --glass-bg: rgba(20, 20, 35, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-purple: #b026ff;
+            --accent-cyan: #00d2ff;
+            --text-main: #e0e0e0;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            /* Efeito de Nebulosa no fundo */
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.25), transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(14, 165, 233, 0.15), transparent 40%);
+            min-height: 100vh;
+        }
+
+        /* Layout Principal */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            background: linear-gradient(90deg, #fff, var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Área de Input */
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+            background: var(--glass-bg);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 15px;
+            color: #fff;
+            font-size: 1rem;
+            resize: vertical;
+            outline: none;
+            box-sizing: border-box; /* Garante que o padding não estoure a largura */
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-purple);
+        }
+
+        #send-btn {
+            align-self: flex-end;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, var(--accent-purple), #6a00ff);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(176, 38, 255, 0.5);
+        }
+
+        #config-btn {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: #aaa;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        #config-btn:hover {
+            color: white;
+            border-color: #fff;
+        }
+
+        /* Grid de Resultados */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .result-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s;
+        }
+        
+        .result-card:hover {
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .card-header {
+            padding: 12px 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        /* Cores específicas para cada modelo */
+        .gemini-header { background: linear-gradient(90deg, rgba(66, 133, 244, 0.2), transparent); color: #8ab4f8; }
+        .meta-header { background: linear-gradient(90deg, rgba(6, 104, 225, 0.2), transparent); color: #6db1ff; }
+        .instant-header { background: linear-gradient(90deg, rgba(255, 100, 100, 0.15), transparent); color: #ffadad; }
+
+        .timer {
+            font-family: monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .output-content {
+            padding: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #d1d5db;
+            min-height: 100px;
+        }
+
+        /* Ajustes do Markdown */
+        .output-content code {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .output-content pre {
+            background: #000;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* Modal Config */
+        .hidden { display: none !important; }
+        
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #111118;
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            width: 400px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+
+        .modal-content h3 { margin-top: 0; color: white; }
+        .info { font-size: 0.85rem; color: #888; margin-bottom: 20px; }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 5px; color: #ccc; font-size: 0.9rem; }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 5px;
+            color: white;
+            box-sizing: border-box;
+        }
+
+        #save-keys {
+            width: 100%;
+            padding: 10px;
+            background: var(--accent-cyan);
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        #save-keys:hover { background: #55dfff; }
+
+        @media (max-width: 768px) {
+            header { flex-direction: column; gap: 15px; text-align: center; }
+            .results-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
 
     <header>
-        <h1>⚔️ Arena de IAs Gratuitas (Atualizado)</h1>
-        <button id="config-btn">⚙️ Configurar Chaves</button>
+        <h1>⚔️ Arena de IA</h1>
+        <button id="config-btn">⚙️ Configurar</button>
     </header>
 
     <div id="config-modal" class="modal hidden">
@@ -35,14 +273,14 @@
 
     <main>
         <div class="input-area">
-            <textarea id="prompt-input" placeholder="Digite seu prompt aqui... Ex: Explique computação quântica para uma criança."></textarea>
+            <textarea id="prompt-input" placeholder="digite aqui seu prompt"></textarea>
             <button id="send-btn">DISPARAR 🚀</button>
         </div>
 
         <div class="results-grid">
             <div class="result-card">
                 <div class="card-header gemini-header">
-                    <span>Google Gemini 1.5 Flash</span>
+                    <span>✨ Gemini 1.5 Flash</span>
                     <span id="timer-gemini" class="timer">--</span>
                 </div>
                 <div id="output-gemini" class="output-content"></div>
@@ -50,7 +288,7 @@
 
             <div class="result-card">
                 <div class="card-header meta-header">
-                    <span>Llama 3.3 70B (Smart)</span>
+                    <span>🧠 Llama 3.3 70B</span>
                     <span id="timer-groq1" class="timer">--</span>
                 </div>
                 <div id="output-groq1" class="output-content"></div>
@@ -58,7 +296,7 @@
 
             <div class="result-card">
                 <div class="card-header instant-header">
-                    <span>Llama 3.1 8B (Instant)</span>
+                    <span>⚡ Llama 3.1 8B</span>
                     <span id="timer-groq2" class="timer">--</span>
                 </div>
                 <div id="output-groq2" class="output-content"></div>
