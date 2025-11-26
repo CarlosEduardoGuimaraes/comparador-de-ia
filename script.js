@@ -1,7 +1,7 @@
 // --- CONFIGURAÇÃO DOS MODELOS ---
 const MODELS = {
     // Modelo 1.5 Flash (Rápido e barato/gratuito)
-    gemini: 'gemini-1.5-flash', 
+    gemini: 'gemini-1.5-flash-latest', 
 
     // Groq: Llama 3.3 (Smart)
     groqSmart: 'llama-3.3-70b-versatile',
@@ -213,3 +213,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
