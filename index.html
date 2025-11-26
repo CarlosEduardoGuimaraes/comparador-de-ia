@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena de IA</title>
+    <title>Arena de IA - Hugging Face & Groq</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <style>
@@ -14,6 +14,7 @@
             --glass-border: rgba(255, 255, 255, 0.1);
             --accent-purple: #b026ff;
             --accent-cyan: #00d2ff;
+            --accent-hf: #ffd21e; /* Amarelo Hugging Face */
             --text-main: #e0e0e0;
         }
 
@@ -44,7 +45,8 @@
         h1 {
             margin: 0;
             font-size: 1.5rem;
-            background: linear-gradient(90deg, #fff, var(--accent-cyan));
+            /* Gradiente misturando cores Groq e HF */
+            background: linear-gradient(90deg, #fff, var(--accent-hf), var(--accent-cyan));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
@@ -80,7 +82,7 @@
             font-size: 1rem;
             resize: vertical;
             outline: none;
-            box-sizing: border-box; /* Garante que o padding não estoure a largura */
+            box-sizing: border-box; 
             transition: border-color 0.3s;
         }
 
@@ -154,7 +156,12 @@
         }
 
         /* Cores específicas para cada modelo */
-        .gemini-header { background: linear-gradient(90deg, rgba(66, 133, 244, 0.2), transparent); color: #8ab4f8; }
+        /* HUGGING FACE (Amarelo) - Substitui o antigo Gemini */
+        .hf-header { 
+            background: linear-gradient(90deg, rgba(255, 210, 30, 0.15), transparent); 
+            color: var(--accent-hf); 
+        }
+        
         .meta-header { background: linear-gradient(90deg, rgba(6, 104, 225, 0.2), transparent); color: #6db1ff; }
         .instant-header { background: linear-gradient(90deg, rgba(255, 100, 100, 0.15), transparent); color: #ffadad; }
 
@@ -164,6 +171,7 @@
             padding: 2px 6px;
             border-radius: 4px;
             font-size: 0.8rem;
+            color: #ccc;
         }
 
         .output-content {
@@ -225,6 +233,7 @@
             color: white;
             box-sizing: border-box;
         }
+        .input-group input::placeholder { color: #555; }
 
         #save-keys {
             width: 100%;
@@ -249,21 +258,21 @@
 
     <header>
         <h1>⚔️ Arena de IA</h1>
-        <button id="config-btn">⚙️ Configurar</button>
+        <button id="config-btn">⚙️ Configurar APIs</button>
     </header>
 
     <div id="config-modal" class="modal hidden">
         <div class="modal-content">
-            <h3>Configurar APIs</h3>
+            <h3>Configurar Chaves</h3>
             <p class="info">Seus dados ficam salvos apenas no navegador.</p>
             
             <div class="input-group">
-                <label>Google Gemini API Key:</label>
-                <input type="password" id="gemini-key" placeholder="Cole a chave do AI Studio aqui...">
+                <label>Hugging Face Access Token (hf_...):</label>
+                <input type="password" id="gemini-key" placeholder="Cole seu token Hugging Face aqui...">
             </div>
 
             <div class="input-group">
-                <label>Groq Cloud API Key:</label>
+                <label>Groq Cloud API Key (gsk_...):</label>
                 <input type="password" id="groq-key" placeholder="Cole a chave da Groq aqui...">
             </div>
 
@@ -273,14 +282,14 @@
 
     <main>
         <div class="input-area">
-            <textarea id="prompt-input" placeholder="digite aqui seu prompt"></textarea>
+            <textarea id="prompt-input" placeholder="Digite aqui seu prompt para comparar as IAs..."></textarea>
             <button id="send-btn">DISPARAR 🚀</button>
         </div>
 
         <div class="results-grid">
             <div class="result-card">
-                <div class="card-header gemini-header">
-                    <span>✨ Gemini 1.5 Flash</span>
+                <div class="card-header hf-header">
+                    <span>🤗 Hugging Face (Mistral)</span>
                     <span id="timer-gemini" class="timer">--</span>
                 </div>
                 <div id="output-gemini" class="output-content"></div>
@@ -304,6 +313,6 @@
         </div>
     </main>
 
-    <script src="script.js?v=2"></script>
+    <script src="script.js?v=3"></script>
 </body>
 </html>
