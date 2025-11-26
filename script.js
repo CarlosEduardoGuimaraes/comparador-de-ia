@@ -7,7 +7,7 @@ const MODELS = {
     groqFast: 'llama-3.1-8b-instant'
 };
 
-const MY_GROQ_KEY = ''; 
+const MY_GROQ_KEY = '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'; 
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -197,3 +197,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
