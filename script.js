@@ -1,7 +1,8 @@
 // --- CONFIGURAÇÃO DOS MODELOS ---
 const MODELS = {
-    // Substituindo Gemini por Hugging Face (Mistral 7B é ótimo e free)
-    hf: 'mistralai/Mistral-7B-Instruct-v0.3', 
+    // Trocamos para o Gemma 2 (Google) hospedado no HF. 
+    // Ele é muito rápido e raramente dá erro de "Failed to fetch" no free tier.
+    hf: 'google/gemma-2-2b-it', 
 
     // Groq: Llama 3.3 (Smart)
     groqSmart: 'llama-3.3-70b-versatile',
@@ -11,22 +12,24 @@ const MODELS = {
 };
 
 // ---------------------------------------------------------
-// 🔒 COLE SEU TOKEN DO HUGGING FACE AQUI
-// (Começa com "hf_...")
+// 🔒 COLE SEU TOKEN AQUI (SE QUISER FIXAR NO CÓDIGO)
+// Hugging Face começa com: "hf_..."
+// Groq começa com: "gsk_..."
 // ---------------------------------------------------------
 const MY_HF_TOKEN = ''; 
+const MY_GROQ_KEY = ''; // Adicionei opção de fixar a Groq também se quiser
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- ATUALIZAÇÃO DE CHAVE ---
-    // Se você preencheu o MY_HF_TOKEN acima, ele salva automaticamente
-    // como 'hf_key' no navegador e ignora a antiga gemini_key.
-    if (MY_HF_TOKEN && MY_HF_TOKEN.trim() !== '') {
-        const currentSaved = localStorage.getItem('hf_key');
-        if (currentSaved !== MY_HF_TOKEN) {
-            console.log("Atualizando token Hugging Face...");
-            localStorage.setItem('hf_key', MY_HF_TOKEN);
-        }
+    // --- LIMPEZA DE CACHE INTELIGENTE ---
+    // Atualiza as chaves se elas existirem no código
+    if (MY_HF_TOKEN && MY_HF_TOKEN.length > 5) {
+        localStorage.setItem('hf_key', MY_HF_TOKEN.trim());
+        console.log("Token HF atualizado via código.");
+    }
+    if (MY_GROQ_KEY && MY_GROQ_KEY.length > 5) {
+        localStorage.setItem('groq_key', MY_GROQ_KEY.trim());
+        console.log("Key Groq atualizada via código.");
     }
 
     const promptInput = document.getElementById('prompt-input');
@@ -35,15 +38,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('config-modal');
     const saveKeysBtn = document.getElementById('save-keys');
 
-    // Carrega chaves
     loadKeys();
 
     // -- Modal Config --
     configBtn.onclick = () => modal.classList.remove('hidden');
 
+    // -- Botão Salvar (Modal) --
     saveKeysBtn.onclick = () => {
-        // OBS: Estamos usando o input que tem ID 'gemini-key' no HTML 
-        // para guardar a chave da Hugging Face, para você não precisar mudar o HTML.
+        // Pega os valores e remove espaços extras (trim)
         const hfVal = document.getElementById('gemini-key').value.trim();
         const groqVal = document.getElementById('groq-key').value.trim();
 
@@ -51,7 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (groqVal) localStorage.setItem('groq_key', groqVal);
 
         modal.classList.add('hidden');
-        alert('Chaves salvas! A chave "Gemini" agora é sua chave Hugging Face.');
+        alert('Chaves salvas! Tente disparar novamente.');
+        
+        // Recarrega para garantir
+        loadKeys();
     };
 
     // -- Botão Enviar --
@@ -59,53 +64,45 @@ document.addEventListener('DOMContentLoaded', () => {
         const prompt = promptInput.value;
         if (!prompt) return alert('Digite um prompt!');
 
-        // 1. Tenta pegar a chave HF do storage
+        // Recupera chaves limpas
         let hfKey = localStorage.getItem('hf_key');
-        
-        // 2. Fallback para a constante
-        if (!hfKey) {
-            hfKey = MY_HF_TOKEN;
-        }
+        let groqKey = localStorage.getItem('groq_key');
 
+        // Validação
         if (!hfKey) {
-            alert('Você precisa configurar o Token da Hugging Face (no lugar da chave Gemini).');
+            alert('Falta o Token do Hugging Face (hf_...). Configure no botão de engrenagem.');
             modal.classList.remove('hidden');
             return;
         }
 
-        const groqKey = localStorage.getItem('groq_key');
-
-        // Resetar UI (Usando o output do Gemini para mostrar o HF)
-        setLoading('gemini', 'Hugging Face (Mistral)');
+        // Resetar UI
+        setLoading('gemini', 'Hugging Face (Gemma 2)'); // Usando slot do Gemini
         
         if(groqKey) {
             setLoading('groq1', 'Llama 3.3 (Smart)');
             setLoading('groq2', 'Llama 3.1 (Fast)');
         } else {
-             document.getElementById(`output-groq1`).innerHTML = '<small style="opacity:0.5">Sem chave Groq</small>';
-             document.getElementById(`output-groq2`).innerHTML = '<small style="opacity:0.5">Sem chave Groq</small>';
+             document.getElementById(`output-groq1`).innerHTML = '<small>Sem chave Groq</small>';
+             document.getElementById(`output-groq2`).innerHTML = '<small>Sem chave Groq</small>';
         }
 
         // Disparar requisições
+        console.log("Iniciando requisições...");
         fetchHuggingFace(prompt, hfKey);
         
         if (groqKey) {
             fetchGroq(prompt, groqKey, MODELS.groqSmart, 'groq1');
             fetchGroq(prompt, groqKey, MODELS.groqFast, 'groq2');
-        } else {
-            console.log("Groq não configurado, pulando...");
         }
     };
 
     function loadKeys() {
-        // Carrega a chave HF dentro do input que se chama 'gemini-key'
+        // Carrega a chave HF no input (que tem ID gemini-key no HTML)
         const savedHf = localStorage.getItem('hf_key');
-        document.getElementById('gemini-key').value = savedHf || MY_HF_TOKEN;
-        
-        // Se quiser mudar o placeholder para facilitar o entendimento:
-        document.getElementById('gemini-key').placeholder = "Cole seu Token Hugging Face aqui";
-        
-        document.getElementById('groq-key').value = localStorage.getItem('groq_key') || '';
+        const savedGroq = localStorage.getItem('groq_key');
+
+        document.getElementById('gemini-key').value = savedHf || '';
+        document.getElementById('groq-key').value = savedGroq || '';
     }
 
     function setLoading(id, name) {
@@ -153,10 +150,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- HUGGING FACE INFERENCE API ---
+    // --- HUGGING FACE API ---
     async function fetchHuggingFace(prompt, apiKey) {
         const start = performance.now();
         try {
+            // Log para debug (não mostra a chave inteira por segurança)
+            console.log(`Chamando HF (${MODELS.hf}) com chave iniciando em: ${apiKey.substring(0,4)}...`);
+
             const response = await fetch(`https://api-inference.huggingface.co/models/${MODELS.hf}`, {
                 method: "POST",
                 headers: {
@@ -166,25 +166,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({
                     inputs: prompt,
                     parameters: {
-                        max_new_tokens: 512, // Limite de resposta
-                        return_full_text: false, // Não repete a pergunta na resposta
+                        max_new_tokens: 512,
+                        return_full_text: false,
                         temperature: 0.7
                     }
                 })
             });
 
-            const data = await response.json();
-
-            // Tratamento de erro específico do HF
-            if (data.error) {
-                // Erro comum: Modelo carregando (Cold Boot)
-                if (data.error.includes("loading")) {
-                    throw new Error("O modelo está 'acordando'. Aguarde 20s e tente de novo.");
-                }
-                throw new Error(data.error);
+            if (!response.ok) {
+                // Tenta ler o erro detalhado da API
+                const errData = await response.json().catch(() => ({}));
+                console.error("Erro HF:", response.status, errData);
+                
+                if (response.status === 401) throw new Error("Chave HF Inválida (401). Verifique o token.");
+                if (response.status === 503) throw new Error("Modelo carregando (503). Tente novamente em 30s.");
+                throw new Error(errData.error || `Erro HTTP ${response.status}`);
             }
 
-            // A resposta do HF geralmente é um array: [{ generated_text: "..." }]
+            const data = await response.json();
+
             let text = "Sem resposta.";
             if (Array.isArray(data) && data.length > 0) {
                 text = data[0].generated_text;
@@ -192,17 +192,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 text = data.generated_text;
             }
 
-            updateResult('gemini', text, start); // Usando o slot visual do Gemini
+            updateResult('gemini', text, start);
 
         } catch (error) {
-            showError('gemini', error.message);
+            console.error(error);
+            let msg = error.message;
+            if (msg.includes("Failed to fetch")) {
+                msg = "Falha de Rede (CORS/Bloqueio). Verifique se sua chave HF está correta e tem permissão 'Read'.";
+            }
+            showError('gemini', msg);
         }
     }
 
-    // --- GROQ (Llama) ---
+    // --- GROQ API ---
     async function fetchGroq(prompt, apiKey, model, elementId) {
         const start = performance.now();
         try {
+            console.log(`Chamando Groq (${model}) com chave iniciando em: ${apiKey.substring(0,4)}...`);
+
             const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
                 headers: {
@@ -218,7 +225,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
-            if (data.error) throw new Error(data.error.message);
+            if (data.error) {
+                console.error("Erro Groq:", data.error);
+                throw new Error(data.error.message);
+            }
 
             const text = data.choices?.[0]?.message?.content || "Sem resposta.";
             updateResult(elementId, text, start);
